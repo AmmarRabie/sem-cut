@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/sem_cut.iml" filepath="$PROJECT_DIR$/sem_cut.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sem-cut.iml" filepath="$PROJECT_DIR$/sem-cut.iml" />
     </modules>
   </component>
 </project>

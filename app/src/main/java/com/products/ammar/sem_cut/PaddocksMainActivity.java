@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -13,19 +14,16 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-
 import com.products.ammar.sem_cut.App.Constants;
+import com.products.ammar.sem_cut.util.FirebaseRealTime;
+import com.products.ammar.sem_cut.util.IAppRealTime;
 
-public class PaddocksMainActivity extends AppCompatActivity implements View.OnClickListener, OnMapReadyCallback {
+public class PaddocksMainActivity extends AppCompatActivity implements View.OnClickListener, OnMapReadyCallback, View.OnLongClickListener {
 
     private Button changeStatusView;
-    private DatabaseReference root;
     private boolean mIsRunning;
 
     private FirebaseRealTime db;
-    private BlutoothHelper bHelper;
     private LatLng currLocation;
 
     private GoogleMap mMap;
@@ -37,7 +35,7 @@ public class PaddocksMainActivity extends AppCompatActivity implements View.OnCl
         setContentView(R.layout.activity_paddocks);
         changeStatusView = findViewById(R.id.changeStatus);
         changeStatusView.setOnClickListener(this);
-        root = FirebaseDatabase.getInstance().getReference();
+        changeStatusView.setOnLongClickListener(this);
 
 
         db = new FirebaseRealTime(new IAppRealTime.OnDataChange() {
@@ -63,12 +61,18 @@ public class PaddocksMainActivity extends AppCompatActivity implements View.OnCl
             @Override
             public void onStatusChange(boolean isRunning) {
                 if (isRunning) {
-                    changeStatusView.setText("Close");
+                    changeStatusView.setText(R.string.suggest_close);
                     mIsRunning = true;
                 } else {
-                    changeStatusView.setText("Open");
+                    changeStatusView.setText(R.string.suggest_open);
                     mIsRunning = false;
                 }
+            }
+
+            @Override
+            public void onSuggestChange(int suggestValue) {
+                // nothing to to here as paddocks is the man who suggest
+                Toast.makeText(PaddocksMainActivity.this, "suggested value updated... wait for driver to accept", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -82,16 +86,28 @@ public class PaddocksMainActivity extends AppCompatActivity implements View.OnCl
     @Override
     public void onClick(View view) {
         if (mIsRunning) {
-            root.child("status").setValue(false);
-        } else {
-            root.child("status").setValue(true);
+//            db.setStatus(false);
+            db.setSuggestValue(0);
+} else {
+//            db.setStatus(true);
+        db.setSuggestValue(1);
         }
-    }
+        }
 
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
+@Override
+public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         driverMarker = mMap.addMarker(new MarkerOptions().position(Constants.TRACK_START_LOCATION).title("driver"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(Constants.TRACK_START_LOCATION));
+        }
+
+@Override
+public boolean onLongClick(View view) {
+        if (mIsRunning) {
+            db.setStatus(false);
+        } else {
+            db.setStatus(true);
+        }
+        return true;
     }
 }

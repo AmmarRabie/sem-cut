@@ -1,4 +1,4 @@
-package com.products.ammar.sem_cut;
+package com.products.ammar.sem_cut.util;
 
 public interface IBlutoothHelper {
     void send(byte[] message);

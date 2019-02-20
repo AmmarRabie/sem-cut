@@ -1,4 +1,4 @@
-package com.products.ammar.sem_cut;
+package com.products.ammar.sem_cut.util;
 
 import android.support.annotation.NonNull;
 
@@ -15,7 +15,11 @@ public class FirebaseRealTime implements IAppRealTime {
 
     private final DatabaseReference root;
     private OnDataChange callbacks;
-    public FirebaseRealTime(final OnDataChange callbacks){
+
+    private boolean firstTimeFetch = true;
+    private ValueEventListener suggestValueEventListener;
+
+    public FirebaseRealTime(final OnDataChange callbacks) {
         this.callbacks = callbacks;
 
         root = FirebaseDatabase.getInstance().getReference();
@@ -24,7 +28,7 @@ public class FirebaseRealTime implements IAppRealTime {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Integer rpm = dataSnapshot.getValue(Integer.class);
-                if(rpm == null) return;
+                if (rpm == null) return;
                 callbacks.onRpmChange(rpm);
             }
 
@@ -38,7 +42,7 @@ public class FirebaseRealTime implements IAppRealTime {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Integer speed = dataSnapshot.getValue(Integer.class);
-                if(speed == null) return;
+                if (speed == null) return;
                 callbacks.onSpeedChange(speed);
             }
 
@@ -53,7 +57,7 @@ public class FirebaseRealTime implements IAppRealTime {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Float latitude = dataSnapshot.child("latitude").getValue(float.class);
                 Float longitude = dataSnapshot.child("longitude").getValue(float.class);
-                if(latitude == null || longitude == null)
+                if (latitude == null || longitude == null)
                     return;
                 callbacks.onLocationChange(new LatLng(latitude, longitude));
             }
@@ -68,7 +72,7 @@ public class FirebaseRealTime implements IAppRealTime {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Boolean isRunning = dataSnapshot.getValue(Boolean.class);
-                if(isRunning == null) return;
+                if (isRunning == null) return;
                 callbacks.onStatusChange(isRunning);
             }
 
@@ -78,23 +82,23 @@ public class FirebaseRealTime implements IAppRealTime {
             }
         });
 
-        root.child("suggestChange").addValueEventListener(new ValueEventListener() {
+        suggestValueEventListener = root.child("suggestChange").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                String value = dataSnapshot.getValue(String.class);
-//                callbacks.onLocationChange();
+                if (firstTimeFetch) {
+                    firstTimeFetch = false;
+                    return;
+                }
+                Integer value = dataSnapshot.getValue(Integer.class);
+                if (value == null) return;
+                callbacks.onSuggestChange(value);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        })
-    }
-
-    @Override
-    public void setCallbacks(OnDataChange callbacks) {
-        this.callbacks = callbacks;
+        });
     }
 
     @Override
@@ -116,7 +120,12 @@ public class FirebaseRealTime implements IAppRealTime {
 
     @Override
     public void setStatus(boolean status) {
-        root.child("rpm").setValue(status);
+        root.child("status").setValue(status);
+    }
 
+    @Override
+    public void setSuggestValue(int value) {
+        firstTimeFetch = true;
+        root.child("suggestChange").setValue(value);
     }
 }

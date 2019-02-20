@@ -1,17 +1,12 @@
 package com.products.ammar.sem_cut;
 
-import android.annotation.SuppressLint;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.view.MotionEvent;
 import android.view.View;
 
 /**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
+ * This is the activity for user to choose his role
  */
 public class ChooserActivity extends Activity {
 

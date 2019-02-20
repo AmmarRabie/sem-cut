@@ -5,4 +5,8 @@
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="title_activity_maps">Map</string>
+    <string name="suggest_close">suggest Close</string>
+    <string name="suggest_open">suggest Open</string>
+    <string name="close">Close</string>
+    <string name="open">Open</string>
 </resources>

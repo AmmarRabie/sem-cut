@@ -2,12 +2,14 @@ package com.products.ammar.sem_cut;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -22,16 +24,17 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.products.ammar.sem_cut.App.Constants;
+import com.products.ammar.sem_cut.util.BlutoothHelper;
+import com.products.ammar.sem_cut.util.FirebaseRealTime;
+import com.products.ammar.sem_cut.util.IAppRealTime;
+import com.products.ammar.sem_cut.util.IBlutoothHelper;
 
 import java.io.UnsupportedEncodingException;
 
 public class DriverActivity extends AppCompatActivity implements View.OnClickListener, OnMapReadyCallback {
 
     private Button changeStatusView;
-    private DatabaseReference root;
     private boolean mIsRunning;
     private boolean mIsMapVisible;
 
@@ -49,7 +52,6 @@ public class DriverActivity extends AppCompatActivity implements View.OnClickLis
         setContentView(R.layout.activity_driver);
         changeStatusView = findViewById(R.id.changeStatus);
         changeStatusView.setOnClickListener(this);
-        root = FirebaseDatabase.getInstance().getReference();
         mIsMapVisible = true;
 
         handleDbChange();
@@ -76,9 +78,10 @@ public class DriverActivity extends AppCompatActivity implements View.OnClickLis
         });
         bHelper.start();
 
+        // TODO: Remove this line after testing
         bHelper.send("5".getBytes());
-        handleLocationChange();
 
+        handleLocationChange();
 
         mapView = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.driverActivity_map);
         mapView.getMapAsync(this);
@@ -109,14 +112,39 @@ public class DriverActivity extends AppCompatActivity implements View.OnClickLis
             @Override
             public void onStatusChange(boolean isRunning) {
                 if (isRunning) {
-                    changeStatusView.setText("Close");
+                    changeStatusView.setText(R.string.close);
                     mIsRunning = true;
                 } else {
-                    changeStatusView.setText("Open");
+                    changeStatusView.setText(R.string.open);
                     mIsRunning = false;
                 }
             }
-        });
+
+            @Override
+                    public void onSuggestChange(int suggestValue) {
+                        showAlertDialog(suggestValue);
+                    }
+                });
+    }
+
+    private void showAlertDialog(final int suggestValue) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        String closeOpen = suggestValue == 1 ? "open" : "close";
+        builder.setMessage("Paddocks wants to " + closeOpen + " the motor").setCancelable(false)
+                .setPositiveButton("Accept change", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        DriverActivity.this.onClick(null);
+
+                    }
+                })
+                .setNegativeButton("Keep status", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                        db.setSuggestValue((suggestValue + 1) % 2); // flip the suggested value
+                    }
+                }).show();
     }
 
     private void handleLocationChange() {
@@ -125,15 +153,15 @@ public class DriverActivity extends AppCompatActivity implements View.OnClickLis
 
         LocationListener locationListener = new LocationListener() {
             public void onLocationChanged(Location location) {
-//                Toast.makeText(DriverActivity.this, "listen for new location", Toast.LENGTH_SHORT).show();
                 // Called when a new location is found by the network location provider.
                 double latitude = location.getLatitude();
                 double longitude = location.getLongitude();
                 currLocation = new LatLng(latitude, longitude);
                 db.setLocation(currLocation);
-//                Toast.makeText(DriverActivity.this, String.valueOf(latitude), Toast.LENGTH_SHORT).show();
                 // update instead when db change
                 driverMarker.setPosition(currLocation);
+
+                // TODO: Remove this line if you want, this line make the marker of the driver located at the center of the map
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(currLocation));
             }
 
@@ -141,16 +169,16 @@ public class DriverActivity extends AppCompatActivity implements View.OnClickLis
             }
 
             public void onProviderEnabled(String provider) {
-                Toast.makeText(DriverActivity.this, "location provider enabled", Toast.LENGTH_SHORT).show();
+                Toast.makeText(DriverActivity.this, "GPS enabled", Toast.LENGTH_SHORT).show();
             }
 
             public void onProviderDisabled(String provider) {
+                Toast.makeText(DriverActivity.this, "GPS disabled", Toast.LENGTH_SHORT).show();
             }
         };
 
-// Register the listener with the Location Manager to receive location updates
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "permission denied", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "gps permission denied", Toast.LENGTH_SHORT).show();
             return;
         }
         if (locationManager == null) {
@@ -166,13 +194,20 @@ public class DriverActivity extends AppCompatActivity implements View.OnClickLis
 
     @Override
     public void onClick(View view) {
+        // note: here we are going to close the motor before text views updated
         if (mIsRunning) {
-            root.child("status").setValue(false);
+            db.setStatus(false);
+            // TODO: send to arduino here to close the motor
+//            bHelper.send("close the motor byte code".getBytes());
         } else {
-            root.child("status").setValue(true);
+            db.setStatus(true);
+            // TODO: // // // open // //
+//            bHelper.send("open the motor byte code".getBytes());
         }
+        // mIsRunning = !mIsRunning; // we are doing it in the db listener
     }
 
+    @Deprecated
     public void onShowHideMapClick(View view) {
         if (mIsMapVisible) {
             ((Button) view).setText("hide");
