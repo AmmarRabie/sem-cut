@@ -77,6 +77,19 @@ public class FirebaseRealTime implements IAppRealTime {
 
             }
         });
+
+        root.child("suggestChange").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                String value = dataSnapshot.getValue(String.class);
+//                callbacks.onLocationChange();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        })
     }
 
     @Override
@@ -96,6 +109,9 @@ public class FirebaseRealTime implements IAppRealTime {
 
     @Override
     public void setLocation(LatLng location) {
+        root.child("location").child("latitude").setValue(location.latitude);
+        root.child("location").child("longitude").setValue(location.longitude);
+
     }
 
     @Override

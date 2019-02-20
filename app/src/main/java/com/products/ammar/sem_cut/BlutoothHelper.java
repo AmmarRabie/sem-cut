@@ -19,8 +19,8 @@ public class BlutoothHelper extends Thread implements IBlutoothHelper{
     public BluetoothDevice btDevice;
     public BluetoothSocket btSocket;
 
-    public static final String SERVICE_ID = "00001101-0000-1000-8000-00805f9b34fb"; //SPP UUID
-    public static final String SERVICE_ADDRESS = "98:D3:31:FB:82:85"; // HC-05 BT ADDRESS
+    public static final String SERVICE_ID = "00001101-0000-1000-8000-00805F9B34FB"; //SPP UUID
+    public static final String SERVICE_ADDRESS = "98:D3:32:31:82:7A"; // HC-05 BT ADDRESS
 
     private OnReceiveDataListener callback;
     private Context mContext;
@@ -44,6 +44,7 @@ public class BlutoothHelper extends Thread implements IBlutoothHelper{
             } else {
                 BlutoothHelper.ConnectThread connectThread = new BlutoothHelper.ConnectThread(btDevice);
                 connectThread.start();
+//                connectThread.run();
             }
         }
     }
@@ -62,6 +63,7 @@ public class BlutoothHelper extends Thread implements IBlutoothHelper{
                 // Read from the InputStream.
                 btSocket.getInputStream().read(mmBuffer);
                 callback.receive(mmBuffer);
+                Log.e("TEST", String.valueOf(mmBuffer));
             } catch (IOException e) {
                 Log.d(TAG, "Input stream was disconnected", e);
                 break;

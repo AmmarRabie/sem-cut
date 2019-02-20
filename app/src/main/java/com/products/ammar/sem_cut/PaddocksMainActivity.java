@@ -57,7 +57,7 @@ public class PaddocksMainActivity extends AppCompatActivity implements View.OnCl
             public void onLocationChange(LatLng location) {
                 currLocation = new LatLng(location.latitude, location.longitude);
                 driverMarker.setPosition(currLocation);
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(currLocation));
+//                mMap.moveCamera(CameraUpdateFactory.newLatLng(currLocation));
             }
 
             @Override

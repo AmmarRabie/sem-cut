@@ -9,6 +9,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -24,6 +25,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.products.ammar.sem_cut.App.Constants;
+
+import java.io.UnsupportedEncodingException;
 
 public class DriverActivity extends AppCompatActivity implements View.OnClickListener, OnMapReadyCallback {
 
@@ -55,6 +58,14 @@ public class DriverActivity extends AppCompatActivity implements View.OnClickLis
         bHelper.setOnReceiveData(new IBlutoothHelper.OnReceiveDataListener() {
             @Override
             public void receive(byte[] data) {
+                String str = null; // for UTF-8 encoding
+                try {
+                    str = new String(data, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                Log.e("BLUE", str);
+//                Toast.makeText(DriverActivity.this, str, Toast.LENGTH_SHORT).show();
 //                int rpm;
 //                int speed;
 //                boolean isRunning;
@@ -63,6 +74,9 @@ public class DriverActivity extends AppCompatActivity implements View.OnClickLis
 //                db.setStatus(isRunning);
             }
         });
+        bHelper.start();
+
+        bHelper.send("5".getBytes());
         handleLocationChange();
 
 
@@ -86,7 +100,7 @@ public class DriverActivity extends AppCompatActivity implements View.OnClickLis
 
             @Override
             public void onLocationChange(LatLng location) {
-                Toast.makeText(DriverActivity.this, "Location change db", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(DriverActivity.this, "Location change db", Toast.LENGTH_SHORT).show();
 //                currLocation = new LatLng(location.latitude, location.longitude);
 //                driverMarker.setPosition(currLocation);
 //                mMap.moveCamera(CameraUpdateFactory.newLatLng(currLocation));
@@ -117,6 +131,7 @@ public class DriverActivity extends AppCompatActivity implements View.OnClickLis
                 double longitude = location.getLongitude();
                 currLocation = new LatLng(latitude, longitude);
                 db.setLocation(currLocation);
+//                Toast.makeText(DriverActivity.this, String.valueOf(latitude), Toast.LENGTH_SHORT).show();
                 // update instead when db change
                 driverMarker.setPosition(currLocation);
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(currLocation));
@@ -126,7 +141,7 @@ public class DriverActivity extends AppCompatActivity implements View.OnClickLis
             }
 
             public void onProviderEnabled(String provider) {
-                Toast.makeText(DriverActivity.this, "location provider enapled", Toast.LENGTH_SHORT).show();
+                Toast.makeText(DriverActivity.this, "location provider enabled", Toast.LENGTH_SHORT).show();
             }
 
             public void onProviderDisabled(String provider) {

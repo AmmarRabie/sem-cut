@@ -52,14 +52,14 @@
             android:layout_weight="1"
             android:text="Close"
             android:textAppearance="?android:textAppearanceMedium" />
-        <Button
-            android:id="@+id/showHideMap"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="hide"
-            android:onClick="onShowHideMapClick"
-            android:textAppearance="?android:textAppearanceMedium" />
+        <!--<Button-->
+            <!--android:id="@+id/showHideMap"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight="1"-->
+            <!--android:text="hide"-->
+            <!--android:onClick="onShowHideMapClick"-->
+            <!--android:textAppearance="?android:textAppearanceMedium" />-->
         </LinearLayout>
 
         <LinearLayout
